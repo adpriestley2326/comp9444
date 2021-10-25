@@ -84,9 +84,14 @@ with torch.no_grad():
         label = seq[1:]
 
         net.init_hidden()
-        hidden_seq, output = net(input)
+        if args.model == 'lstm':
+            hidden_seq, output, context_seq = net(input)
+            context = context_seq.squeeze()
+        else:
+            hidden_seq, output = net(input)
 
         hidden = hidden_seq.squeeze()
+        
         
         lang.print_outputs(epoch, seq, state, hidden, target, output)
         sys.stdout.flush()

@@ -71,6 +71,7 @@ class LSTM_model(nn.Module):
         """Assumes x is of shape (batch, sequence, feature)"""
         batch_size, seq_size, _ = x.size()
         hidden_seq = []
+        context_seq = []
         if init_states is None:
             h_t, c_t = (torch.zeros(batch_size,self.num_hid).to(x.device), 
                         torch.zeros(batch_size,self.num_hid).to(x.device))
@@ -91,9 +92,12 @@ class LSTM_model(nn.Module):
             c_t = f_t * c_t + i_t * g_t
             h_t = o_t * torch.tanh(c_t)
             hidden_seq.append(h_t.unsqueeze(0))
+            context_seq.append(c_t.unsqueeze(0))
         hidden_seq = torch.cat(hidden_seq, dim=0)
+        context_seq = torch.cat(context_seq, dim=0)
         # reshape from (sequence, batch, feature)
         #           to (batch, sequence, feature)
         hidden_seq = hidden_seq.transpose(0,1).contiguous()
+        context_seq = context_seq.transpose(0,1).contiguous()
         output = hidden_seq @ self.V + self.out_bias
-        return hidden_seq, output
+        return hidden_seq, output, context_seq

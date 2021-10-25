@@ -39,10 +39,10 @@ class NetConv(nn.Module):
     def __init__(self):
         super(NetConv, self).__init__()
         # Parameters to play around with
-        kernel1 = 7
+        kernel1 = 5
         kernel2 = 5
-        filters1 = 20
-        filters2 = 16
+        filters1 = 30
+        filters2 = 20
 
         self.conv1 = nn.Conv2d(1, filters1, kernel1, padding=2)
         self.conv2 = nn.Conv2d(filters1, filters2, kernel2)

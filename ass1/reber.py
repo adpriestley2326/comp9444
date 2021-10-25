@@ -80,10 +80,12 @@ class lang_reber:
         target = target.unsqueeze(0)
         return input, seq, target, state
 
-    def print_outputs(self,epoch,seq,state,hidden,target,output):
+    def print_outputs(self,epoch,seq,state,hidden,target,output,context=None):
         log_prob = F.log_softmax(output, dim=2)
         prob_out = torch.exp(log_prob)
         hidden_np = hidden.squeeze().numpy()
+        if context is not None:
+            context_np = context.squeeze().numpy()
         target_np = target.squeeze().numpy()
         prob_out_np = prob_out.squeeze().numpy()
         print('-----')
@@ -98,9 +100,14 @@ class lang_reber:
         print('     B    T    S    X    P    V    E')
         for k in range(len(state)-1):
             print(state[k+1],target_np[k,:])
-        print('hidden activations and output probabilities [BTSXPVE]:')
-        for k in range(len(state)-1):
-            print(state[k+1],hidden_np[k,:],prob_out_np[k,:])
+        if context is None:
+            print('hidden activations and output probabilities [BTSXPVE]:')
+            for k in range(len(state)-1):
+                print(state[k+1],hidden_np[k,:],prob_out_np[k,:])
+        else:
+            print('hidden & context activations, and output probabilities [BTSXPVE]:')
+            for k in range(len(state)-1):
+                print(state[k+1],hidden_np[k,:],context_np[k,:],prob_out_np[k,:])
         #print(prob_out.squeeze().numpy())
         print('epoch: %d' %epoch)
         if self.embed:
