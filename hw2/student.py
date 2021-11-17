@@ -20,6 +20,7 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 
+
 """
    Answer to Question:
 
@@ -49,18 +50,22 @@ class Network(nn.Module):
 
     def __init__(self):
         super().__init__()
+        self.conv1 = nn.Conv2d(3, 10, 3, padding=1)
+        self.fc1 = nn.Linear(10*80*80, 8)
         
     def forward(self, input):
-        pass
+        x = self.conv1(input)
+        out = self.fc1(x)
+        return out
 
 net = Network()
     
 ############################################################################
 ######      Specify the optimizer and loss function                   ######
 ############################################################################
-optimizer = None
+optimizer = optim.SGD(net.parameters(), lr=0.01) # Kuzu used optim.SGD
 
-loss_func = None
+loss_func = F.nll_loss # Kuzu used F.nll_los
 
 
 ############################################################################
