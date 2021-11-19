@@ -59,7 +59,9 @@ reduce overfitting but also resulted in strange behaviour when more than
 a couple of dropout layers were added. Then, image transformations, outlined
 above. The final step taken to avoid overfitting was using batch 
 normalisation: this was used between particular convolutional layers, and
-between each fully connected layer. 
+between each fully connected layer.
+
+- Adam Priestley | z5207265
 """
 
 ############################################################################
@@ -76,13 +78,10 @@ def transform(mode):
         return T.Compose([
             T.ToTensor(),
             T.RandomResizedCrop(size=80, scale=(0.8, 1.0)),
-            #T.GaussianBlur(5),
             T.RandomAffine(60),
             T.ColorJitter(0.3, 0.3, 0.3),
             T.RandomHorizontalFlip(),
-            #T.RandomAdjustSharpness(3),
             T.RandomErasing(),
-            #T.RandomPerspective(),
         ])
     elif mode == 'test':
         return T.ToTensor()
@@ -141,7 +140,7 @@ net = Network()
 ######      Specify the optimizer and loss function                   ######
 ############################################################################
 #optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.01) # Kuzu used optim.SGD
-optimizer = optim.AdamW(net.parameters(), lr=0.012, weight_decay=0.05)
+optimizer = optim.AdamW(net.parameters(), lr=0.011, weight_decay=0.05)
 
 loss_func = F.nll_loss # Kuzu used F.nll_los
 
@@ -162,6 +161,6 @@ scheduler = None
 #######              Metaparameters and training options              ######
 ############################################################################
 dataset = "./data"
-train_val_split = 0.8
+train_val_split = 0.9
 batch_size = 150
 epochs = 100
