@@ -140,7 +140,7 @@ net = Network()
 ######      Specify the optimizer and loss function                   ######
 ############################################################################
 #optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.01) # Kuzu used optim.SGD
-optimizer = optim.AdamW(net.parameters(), lr=0.011, weight_decay=0.05)
+optimizer = optim.AdamW(net.parameters(), lr=0.013, weight_decay=0.05)
 
 loss_func = F.nll_loss # Kuzu used F.nll_los
 
@@ -163,4 +163,4 @@ scheduler = None
 dataset = "./data"
 train_val_split = 0.9
 batch_size = 150
-epochs = 100
+epochs = 150
