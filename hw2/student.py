@@ -26,6 +26,40 @@ import torchvision.transforms as T
 
 Briefly describe how your program works, and explain any design and training
 decisions you made along the way.
+
+Architecture: loosely based on AlexNet. 5 convolutional layers, 3 fully
+connected/dense layers. I started with fewer layers but found the model
+was underfitting. Max pooling is used between some of the convolutional
+layers to reduce the size of the data and speed up processing. ReLU
+activation function is used for all layers except the final layer, which
+uses log_softmax activation, as this is a common choice for multi-class
+classification problems.
+
+Loss function - Negative Log Likelihood: Selected as a simple but effective
+function for multi-class classification like this problem.
+
+Optimiser - AdamW: AdamW was chosen as it is considered to be an
+improvement over the already effective Adam algorithm, in how it handles
+weight decay.
+
+Image transformations: In order to increase the effective size of the
+training data, and reduce overfitting, image transformations were applied
+including: randomized cropping, random affine transforms, random
+adjustments of brightness, saturation, etc. (colorJitter), horizontal
+flipping, and erasing random areas of the image. While *signficantly*
+slowing down training, this did help with overfitting.
+
+Metaparameters: Batch size was varied between 100 & 200, with little
+observed difference. Other metaparameters were kept at the default values.
+
+Avoiding overfitting: The first method applied to avoid overfitting was
+weight decay - various values were used but this alone was not sufficient.
+The next approach was to add dropout layers to the network, which did
+reduce overfitting but also resulted in strange behaviour when more than
+a couple of dropout layers were added. Then, image transformations, outlined
+above. The final step taken to avoid overfitting was using batch 
+normalisation: this was used between particular convolutional layers, and
+between each fully connected layer. 
 """
 
 ############################################################################
@@ -44,9 +78,9 @@ def transform(mode):
             T.RandomResizedCrop(size=80, scale=(0.8, 1.0)),
             #T.GaussianBlur(5),
             T.RandomAffine(60),
-            T.ColorJitter(0.4, 0.4, 0.5, 0.2),
+            T.ColorJitter(0.3, 0.3, 0.3),
             T.RandomHorizontalFlip(),
-            T.RandomAdjustSharpness(3),
+            #T.RandomAdjustSharpness(3),
             T.RandomErasing(),
             #T.RandomPerspective(),
         ])
@@ -130,4 +164,4 @@ scheduler = None
 dataset = "./data"
 train_val_split = 0.8
 batch_size = 150
-epochs = 200
+epochs = 100
