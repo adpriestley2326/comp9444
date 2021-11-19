@@ -1,0 +1,236 @@
+COPM9444 Ass2
+
+Starting params:
+optimiser: SGD
+lr = 0.01
+train_val_split = 0.8
+batch_size = 200
+epochs = 10
+relu for conv layers
+log_softmax for fc layers
+
+V1: Simple conv net
+- 1 conv layer (3,10,3,padding=1)
+- 1 fc layer (10*80*80,8)
+	Result: 34.69% test, around 75% train - overfitting!
+
+V2: More layers, more filters, max pooling
+conv1(3,20,5,padding=2)
+maxpool(2)
+conv2(20,20,5,padding=2)
+maxpool(2)
+conv3(20,20,5,padding=2)
+fc(20*20*20,8)
+	Result: 28.06%
+
+
+V3: Fewer filters, added momentum=0.01
+conv2(20,16,5,padding=2)
+...
+conv3(16,10,5,padding=2)
+fc(10*20*20,8)
+	Result: 28.25%
+
+V4: Additional fc layer, switch optimizer to Adam(lr=0.01), now do 50 epochs
+...
+fc1(10*20*20,20)
+fc2(20,8)
+	Result: Stuck at around 30% after 30 epochs
+
+V5: Increase lr to 0.03, try batch size 300
+	Result: Stuck at local minumum (loss 124.38, test acc 11.19%)
+
+V6: Tried smaller batch size of 100
+	Result: Stuck at local minimum (loss 294.73)
+
+V7: Batch size back to 200, lr=0.04
+	Result: Stuck in local miinmum around loss=169.55, test=11.88%
+
+NOTE - The confusion matrix suggests that it's getting stuck by classifying everything as the first class
+	Maybe something's wrong here?
+
+V8: Dropped lr back down, now lr=0.008
+	Result: Overfitting - test peaked around 35%, train kept going up (around 77% by epoch 25)
+
+V9: Added weight_decay=0.1 to optimizer
+	Result: Less overfitting, but only got to abour 27% accuracy
+
+V10: Added more conv filters, lr=0.005, weight_decay=0.05
+conv2(20,20,5,padding=2)
+conv3(20,16,5,padding=2)
+	Result: Stuck in local min (loss=156, train=37%, test=36%)
+
+V11: More filters!
+conv1(3,40,...)
+conv2(40,20,...)
+conv3(20,20,...)
+...
+	Result: Stuck in local min (similar to before)
+
+V12: Less weight decay (0.01)
+	Result: got up to about 65% train, 50% test
+
+V13: Even less weight decay (0.001)
+	Result: back to overfitting - test peaked around 47%
+
+V14: Add dropout layer to reduce overfitting
+...
+pool(...)
+dropout(p=0.2)
+conv2(...)
+...
+	Result: Still overfitting
+
+V15: Increasing dropout probability to 0.4
+	Result: Still overfitting
+
+V16: Increase dropout to p=0.6
+	Result: less overfitting, but still overfitting
+
+V17: Spread out dropout between multiple layers (p=0.4 except at output p=0.2)
+	Result: Not overfitting, but stuck around loss=163, train=25%, test=28%
+
+V18: Cut back on filters, back to 20 max per layer.
+	Result: similar
+
+V19: Reduced learning rate to 0.002, and slightly decreased dropout to p=0.3 & 0.15
+	Result: getting there, still stuck around 40% accuracy
+
+V20: lr=0.001, fc1 now has 40 nodes
+	Result: Started overfitting around 40 epochs, test peaked around 47%
+
+
+V21:
+fewer nodes in conv layers,
+additional fully connected layer added,
+raised dropout back up,
+switched to relu for all but last layer
+	Result: underfitting by epoch 50 (~35% test)
+
+v22:
+4th convolutional layer,
+pooling after 1st 2,
+conv filters: 16,32,32,64
+	Result = Not much progress from loss of around 160
+
+v23: up the learning rate to 0.003, half weight decay to 0.0005
+	Result: immediately stuck in local minimum
+
+v24: let's up learning rate more (0.006)
+	Result: puts everything in first category again
+
+v25: lr=0.01
+	Result: same
+
+v26: weight_decay = 0.005
+	Result: same
+
+v27: dropout p=0.5 & 0.3, weight_decay = 0.1
+	''
+
+v28: let go the other way, dropout p=0.3 & 0.15, no weight_decay
+	''
+
+v29: removed dropout for conv layers
+	Result: back to regular overfitting
+
+v30: halved num filters in each layer
+	Result: back to grouping everything into cat1
+
+v31: lr=0.001
+	Result: Improvement! Overfitted a bit but got test about 52%
+
+v32: conv2 from 16 -> 32 layers, added weight_decay of 0.001
+	Result: not quite as good, 74% train, 48% test
+
+v33: other way, all layers have max 16 filters/nodes
+	Result: still not as good as v31
+
+v34: undid changes of v33, last fc layers is now 24 nodes
+	Result: similar to v31, 67.33% final train, 53% peak test
+
+v35: added dropout between last conv4 & fc1, increased dropout to p=0.4 & 0.2
+	Result: not quite as good, around 50%, but less overfitting
+
+v36: conv1 up to 16 layers:
+	Result: little change
+
+v37: less pooling between conv layers (now between 2 & 3, and 4 & fc1)
+	Result: Drop in performance (about 38% by epoch 20)
+
+v38: moved pooling to just after the first two conv layers
+	Result: Similar preformance
+
+v39: smaller (3x3) kernel for conv3&4, back to maxpool after conv1-3
+	Result: no big change (maybe worse)
+
+v40: no dropout after conv, only between fc layers, circular padding for conv1-2:
+	Result: not bad, peak test acc around 50%, train acc around 56%
+
+v41: different optimizer - AdamW
+	Result: performance drop - about 42% test acc by epoch 30
+
+v42: increased lr=0.008, weight_decay=0.7, reflect padding for conv1-2
+	Result: stuck at around 40% test & train acc
+
+v43: dense connections for linear layers
+	Result: only slightly better
+
+v44: more filters/nodes
+conv1(3,32,7)
+conv2(32,64,5)
+conv3(64,64,3)
+conv4(64,64,3)
+fc1(64*(10*10),64)
+fc2(64,32)
+fc3(32+64,8)
+	Result: overfitting like before
+
+v45: added back in lots of dropout
+	Result: back to classifying everything as one class
+
+v46: removed dropout
+	Result: overfitting
+
+v47: added transforms
+T.ToTensor(),
+T.RandomResizedCrop(size=80, scale=(0.8, 1.0)),
+T.GaussianBlur(5),
+T.RandomAffine(60),
+T.ColorJitter(0.4, 0.4, 0.5, 0.2),
+T.RandomHorizontalFlip(),
+T.RandomAdjustSharpness(3),
+T.RandomErasing(),
+T.RandomPerspective(),
+	Result: VERY slow, stuck in local min (loss=160, test=38%)
+
+v48: remove perspective transform
+	Result: Still slow, but apparently slightly better accuracy by epoch 9
+
+v49: reduce weight decay to 0.1 (let's try to get things going)
+	Result: Completely collapses again
+
+v50: weight_decay=0.4
+	Result: stuck around loss=158, train=32%, test=35/38%
+
+v51: additional dense/fc layer, increase lr to 0.009, remove blur transform
+	Result: 
+
+v52: weight_decay down to 0.08, added batch normalization between:
+- conv2&3 (2D)
+- conv4 & fc1 (2D)
+- all fc layers (1D)
+	Result: BEST YET! By epoch 50: loss=139, train=59, test=63
+
+v53: more filters, lr=0.01, epochs=100, batch_size = 150
+	Result: Test stuck in low 60s by epoch 85, min loss around 172
+
+v54: extra conv layer (96 filters), lr=0.01, weight_decay = 0.05
+	Result: not much change
+
+v55: Addtional dense/fc layer (with batchnorm), also batchnorm now in correct spots
+
+
+
+
+
